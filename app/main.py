@@ -1,5 +1,4 @@
-from fastapi import FastAPI, APIRouter
-
+from fastapi import APIRouter, FastAPI
 
 app = FastAPI(title="Recipe API", openapi_url="/openapi.json")
 
