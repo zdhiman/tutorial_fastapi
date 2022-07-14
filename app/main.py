@@ -16,9 +16,6 @@ app = FastAPI(title="Recipe API", openapi_url="/openapi.json")
 api_router = APIRouter()
 
 
-# Updated to serve a Jinja2 template
-# https://www.starlette.io/templates/
-# https://jinja.palletsprojects.com/en/3.0.x/templates/#synopsis
 @api_router.get("/", status_code=200)
 def root(request: Request) -> Any:
     """
