@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, FastAPI
 
 RECIPES = [
@@ -36,7 +38,6 @@ def root() -> dict:
 
 
 # path parameter
-# https://fastapi.tiangolo.com/tutorial/path-params/
 @api_router.get("/recipe/{recipe_id}", status_code=200)
 def fetch_recipe(*, recipe_id: int) -> dict:
     """
@@ -46,6 +47,23 @@ def fetch_recipe(*, recipe_id: int) -> dict:
     result = [recipe for recipe in RECIPES if recipe["id"] == recipe_id]
     if result:
         return result[0]
+
+
+# query parameter
+@api_router.get("/search/", status_code=200)
+def search_recipes(
+    keyword: Optional[str] = None, max_results: Optional[int] = 10
+) -> dict:
+    """
+    Search for recipes based on label keyword
+    """
+    if not keyword:
+        # we use Python list slicing to limit results
+        # based on the max_results query parameter
+        return {"results": RECIPES[:max_results]}
+
+    results = filter(lambda recipe: keyword.lower() in recipe["label"].lower(), RECIPES)
+    return {"results": list(results)[:max_results]}
 
 
 app.include_router(api_router)
