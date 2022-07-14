@@ -1,21 +1,33 @@
+from pathlib import Path
 from typing import Any, Optional
 
-from fastapi import APIRouter, FastAPI, HTTPException, Query
+from fastapi import APIRouter, FastAPI, HTTPException, Query, Request
+from fastapi.templating import Jinja2Templates
 
 from app.recipe_data import RECIPES
 from app.schemas import Recipe, RecipeCreate, RecipeSearchResults
+
+BASE_PATH = Path(__file__).resolve().parent
+TEMPLATES = Jinja2Templates(directory=str(BASE_PATH / "templates"))
+
 
 app = FastAPI(title="Recipe API", openapi_url="/openapi.json")
 
 api_router = APIRouter()
 
 
+# Updated to serve a Jinja2 template
+# https://www.starlette.io/templates/
+# https://jinja.palletsprojects.com/en/3.0.x/templates/#synopsis
 @api_router.get("/", status_code=200)
-def root() -> dict:
+def root(request: Request) -> Any:
     """
     Root GET
     """
-    return {"msg": "Hello, World!"}
+    return TEMPLATES.TemplateResponse(
+        "index.html",
+        {"request": request, "recipes": RECIPES},
+    )
 
 
 @api_router.get("/recipe/{recipe_id}", status_code=200, response_model=Recipe)
@@ -37,7 +49,7 @@ def fetch_recipe(*, recipe_id: int) -> Any:
 def search_recipes(
     *,
     keyword: Optional[str] = Query(None, min_length=3, example="chicken"),
-    max_results: Optional[int] = 10
+    max_results: Optional[int] = 10,
 ) -> dict:
     """
     Search for recipes based on label keyword
